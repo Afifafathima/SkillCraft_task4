@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Girly To‑Do App</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background:
+        linear-gradient(rgba(255, 240, 250, 0.7), rgba(255, 220, 240, 0.7)),
+        url('https://i.pinimg.com/originals/91/2b/59/912b59673b59b5ae29a67b9e2b8260a0.jpg') center/cover no-repeat fixed;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      padding: 30px;
+      gap: 30px;
+      background-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .form-section, .task-section {
+      background: rgba(255,255,255,0.85);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .form-section { flex:1; }
+    .task-section { flex:2; }
+
+    h2 {
+      text-align: center;
+      color: #c2185b;
+      margin-bottom: 20px;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+      display:flex;
+      flex-direction:column;
+    }
+
+    label {
+      margin-bottom: 5px;
+      font-weight:500;
+      color:#8e044e;
+    }
+
+    input {
+      padding:10px;
+      font-size:1rem;
+      border:1px solid #ccc;
+      border-radius:8px;
+    }
+
+    button.add {
+      margin-top:10px;
+      background:#f8a6c7;
+      color:#fff;
+      border:none;
+      padding:10px;
+      border-radius:8px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:background 0.3s;
+    }
+
+    button.add:hover { background:#ee7fac; }
+
+    .task-list { list-style:none; padding:0; }
+
+    .task-item {
+      background: #fff;
+      border-left:6px solid #f48fb1;
+      margin-bottom:15px;
+      padding:15px;
+      border-radius:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .task-left {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex:1;
+    }
+
+    .task-left input[type="checkbox"] { transform:scale(1.3); }
+
+    .task-details {
+      display:flex;
+      flex-direction:column;
+    }
+
+    .task-details.completed span {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+
+    .task-actions button {
+      margin-left:8px;
+      padding:6px 10px;
+      border:none;
+      background:#ffd6eb;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:0.85rem;
+      transition:background 0.3s;
+    }
+
+    .task-actions button:hover {
+      background:#ffc1df;
+    }
+
+    .no-task {
+      text-align: center;
+      color: #888;
+      font-size:1.1rem;
+      padding:20px;
+      border:2px dashed #f8a6c7;
+      border-radius:10px;
+    }
+
+    @media(max-width:768px){
+      .container { flex-direction:column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="form-section">
+      <h2>🌸 Add a New Task 🌸</h2>
+      <div class="form-group">
+        <label for="taskInput">Task</label>
+        <input type="text" id="taskInput" placeholder="e.g. Buy ribbon bows ✨" />
+      </div>
+      <div class="form-group">
+        <label for="taskDate">Date</label>
+        <input type="date" id="taskDate" />
+      </div>
+      <div class="form-group">
+        <label for="taskTime">Time</label>
+        <input type="time" id="taskTime" />
+      </div>
+      <div class="form-group">
+        <button class="add" onclick="addTask()">Add Task</button>
+      </div>
+    </div>
+
+    <div class="task-section">
+      <h2>📝 Your To-Do List</h2>
+      <ul id="taskList" class="task-list"></ul>
+      <div id="noTaskMessage" class="no-task">No tasks added yet 💕</div>
+    </div>
+  </div>
+
+  <script>
+    let tasks = [];
+
+    function renderTasks() {
+      const list = document.getElementById("taskList");
+      const noMsg = document.getElementById("noTaskMessage");
+      list.innerHTML = "";
+      if (tasks.length === 0) {
+        noMsg.style.display = "block";
+        return;
+      }
+      noMsg.style.display = "none";
+
+      tasks.forEach((t, i) => {
+        const li = document.createElement("li"); li.className="task-item";
+
+        const left = document.createElement("div"); left.className="task-left";
+        const cb = document.createElement("input");
+        cb.type="checkbox"; cb.checked=t.completed;
+        cb.onchange = () => { t.completed = cb.checked; renderTasks(); };
+
+        const details = document.createElement("div");
+        details.className="task-details" + (t.completed ? " completed" : "");
+        const span = document.createElement("span"); span.textContent = t.text;
+        const dt = document.createElement("small"); dt.textContent = t.date + " " + t.time;
+
+        details.append(span, dt);
+        left.append(cb, details);
+
+        const actions = document.createElement("div"); actions.className="task-actions";
+        const edit = document.createElement("button");
+        edit.textContent = "🖉";
+        edit.onclick = () => {
+          const nt = prompt("Edit task:", t.text);
+          if (nt !== null) { t.text = nt.trim(); renderTasks(); }
+        };
+
+        const del = document.createElement("button");
+        del.textContent = "🗑️";
+        del.onclick = () => {
+          if (confirm("Delete this task?")) { tasks.splice(i, 1); renderTasks(); }
+        };
+
+        actions.append(edit, del);
+
+        li.append(left, actions);
+        list.append(li);
+      });
+    }
+
+    function addTask(){
+      const text = document.getElementById("taskInput").value.trim();
+      const date = document.getElementById("taskDate").value;
+      const time = document.getElementById("taskTime").value;
+      if (!text || !date || !time) return alert("Fill all fields 💖");
+      tasks.push({text, date, time, completed: false});
+      document.getElementById("taskInput").value = "";
+      document.getElementById("taskDate").value = "";
+      document.getElementById("taskTime").value = "";
+      renderTasks();
+    }
+
+    renderTasks();
+  </script>
+</body>
+</html>
